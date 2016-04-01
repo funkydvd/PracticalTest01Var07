@@ -199,4 +199,15 @@ public class PracticalTest01Var07MainActivity extends ActionBarActivity {
         stopService(intent);
         super.onDestroy();
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(messageBroadcastReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(messageBroadcastReceiver);
+        super.onPause();
+    }
 }

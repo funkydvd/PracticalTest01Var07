@@ -17,8 +17,6 @@ public class ProcessingThread extends Thread {
     private boolean isRunning = true;
     private String fst;
     private String snd;
-    private double arithmeticMean;
-    private double geometricMean;
     private Random random = new Random();
     public ProcessingThread(Context context, String fst, String snd) {
         this.context = context;
