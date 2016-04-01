@@ -1,8 +1,12 @@
 package ro.pub.cs.systems.eim.practicaltest01var07;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -21,7 +25,7 @@ public class PracticalTest01Var07MainActivity extends ActionBarActivity {
     private CheckBox cb2 = null;
 
     private Button btn = null;
-
+    private IntentFilter intentFilter = new IntentFilter();
     private ButtonClickListener buttonClickListener = new ButtonClickListener();
     private class ButtonClickListener implements Button.OnClickListener {
 
@@ -39,18 +43,29 @@ public class PracticalTest01Var07MainActivity extends ActionBarActivity {
             }
         }
     }
-
-
+    private MessageBroadcastReceiver messageBroadcastReceiver = new MessageBroadcastReceiver();
+    private class MessageBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("[Message]", intent.getStringExtra("message"));
+        }
+    }
+    private int serviceStatus;
+    private int started = 0;
         @Override
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_practical_test01_var07_main);
+            for (int index = 0; index < Constants.actionTypes.length; index++) {
+                intentFilter.addAction(Constants.actionTypes[index]);
+            }
         et1 = (EditText) findViewById(R.id.editText);
         et2 = (EditText) findViewById(R.id.editText2);
         btn = (Button) findViewById(R.id.button);
             btn.setOnClickListener(buttonClickListener);
         cb1 = (CheckBox) findViewById(R.id.checkBox);
+
         cb1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -61,6 +76,16 @@ public class PracticalTest01Var07MainActivity extends ActionBarActivity {
                 else
                 {
                     et1.setEnabled(false);
+                }
+                if ((((CheckBox) view).isChecked()==false && cb2.isChecked()==false) && et1.getText().toString().length()>0 &&
+                        et2.getText().toString().length()>0 && started == 0)
+                {
+                    Intent intent = new Intent(getApplicationContext(), PracticalTest01Var07Service.class);
+                    intent.putExtra("et1", et1.getText().toString());
+                    intent.putExtra("et2", et2.getText().toString());
+                    getApplicationContext().startService(intent);
+                    serviceStatus = 1;
+                    started = 1;
                 }
             }
         });
@@ -76,6 +101,16 @@ public class PracticalTest01Var07MainActivity extends ActionBarActivity {
                 else
                 {
                     et2.setEnabled(false);
+                }
+                if ((((CheckBox) view).isChecked()==false && cb1.isChecked()==false) && et1.getText().toString().length()>0 &&
+                        et2.getText().toString().length()>0 && started == 0)
+                {
+                    Intent intent = new Intent(getApplicationContext(), PracticalTest01Var07Service.class);
+                    intent.putExtra("et1", et1.getText().toString());
+                    intent.putExtra("et2", et2.getText().toString());
+                    getApplicationContext().startService(intent);
+                    started = 1;
+                    serviceStatus = 1;
                 }
             }
         });
@@ -157,5 +192,11 @@ public class PracticalTest01Var07MainActivity extends ActionBarActivity {
         if (requestCode == 100) {
             Toast.makeText(this, "The activity returned with result " + resultCode, Toast.LENGTH_LONG).show();
         }
+    }
+    @Override
+    protected void onDestroy() {
+        Intent intent = new Intent(this, PracticalTest01Var07Service.class);
+        stopService(intent);
+        super.onDestroy();
     }
 }
